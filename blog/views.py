@@ -27,3 +27,20 @@ def post_detail(request, pk):
     }
     template_name = 'blog/post_detail.html'
     return render(request, template_name, context)
+
+
+# handles crating a new Form
+def post_new(request):
+    if request.method == 'POST': # checks the http method
+        form = PostForm(request.POST)
+        if form.is_valid(): # checks for all fields to be filled correctly
+            post = form.save(commit=False) # creates the form but doesn't save immediately
+            post.author = request.user # assigns the author to the current looged-in user
+            post.published_date = timezone.now() # utilizes the publish method in the Model(Post)
+            post.save() # finally saves the data sent across
+            return redirect('post_detail', pk=post.pk) # redirects to the post detail...
+    else:
+        form = PostForm()
+    context = {'form': form}
+    template_name = 'blog/post_new.html'
+    return render(request, template_name, context)
