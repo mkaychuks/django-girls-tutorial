@@ -44,3 +44,20 @@ def post_new(request):
     context = {'form': form}
     template_name = 'blog/post_new.html'
     return render(request, template_name, context)
+
+
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk) # gets a specific post from the Database
+    if request.method == 'POST': # checks the http method to ascertain its a POST request
+        form = PostForm(request.POST, instance=post) # sent the form request
+        if form.is_valid(): # validates the form
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = PostForm(instance=post)
+    context = {'form': form}
+    template_name = 'blog/post_edit.html'
+    return render(request, template_name, context)
